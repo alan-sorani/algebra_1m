@@ -1,0 +1,880 @@
+\RequirePackage{luatex85}
+\PassOptionsToPackage{luatex}{hyperref}
+
+\documentclass[article, 10pt,oneside]{article}
+
+%\counterwithout{section}{chapter}
+
+%%%%%%%%%%%%%
+%  Geometry %
+%%%%%%%%%%%%%%
+
+\RequirePackage{geometry}
+\geometry{
+	 a4paper,
+	 inner=20mm,
+	 outer=30mm,
+	 marginparwidth = 20mm,
+	 top = 20mm,
+	 bottom = 20mm
+	}
+
+%%%%%%%%%
+% Babel %
+%%%%%%%%%
+
+\usepackage[nil,bidi=basic-r]{babel}
+\babelprovide[import=he,main]{hebrew}
+\babelprovide[import=en-GB]{english}
+
+% For some reason Babel’s `\babelfont` doesn’t work
+\babelfont[hebrew]{rm}{Open Sans Hebrew}
+
+\newcommand{\texthebrew}[1]{\foreignlanguage{hebrew}{#1}}
+\newcommand{\nikud}[1]{$\mbox{\H{#1}}$}
+\newcommand{\textenglish}[1]{\foreignlanguage{english}{#1}}
+\newcommand{\LR}[1]{{‏\textdir TLT #1}}
+
+%%%%%%%%%%%%
+% Styling %
+%%%%%%%%%%%%
+
+\renewcommand{\emph}[1]{\textbf{#1}}
+
+%%%%%%%%%%
+% Maths  %
+%%%%%%%%%%
+
+\usepackage{math-symbols}
+\usepackage{math-fonts}
+\usepackage{math-graphics}
+\usepackage{math-theorems-heb}
+
+%long division
+
+\usepackage{polynom}
+\makeatletter
+\def\pld@CF@loop#1+{%
+    \ifx\relax#1\else
+        \begingroup
+          \pld@AccuSetX11%
+          \def\pld@frac{{}{}}\let\pld@symbols\@empty\let\pld@vars\@empty
+          \pld@false
+          #1%
+          \let\pld@temp\@empty
+          \pld@AccuIfOne{}{\pld@AccuGet\pld@temp
+                            \edef\pld@temp{\noexpand\pld@R\pld@temp}}%
+           \pld@if \pld@Extend\pld@temp{\expandafter\pld@F\pld@frac}\fi
+           \expandafter\pld@CF@loop@\pld@symbols\relax\@empty
+           \expandafter\pld@CF@loop@\pld@vars\relax\@empty
+           \ifx\@empty\pld@temp
+               \def\pld@temp{\pld@R11}%
+           \fi
+          \global\let\@gtempa\pld@temp
+        \endgroup
+        \ifx\@empty\@gtempa\else
+            \pld@ExtendPoly\pld@tempoly\@gtempa
+        \fi
+        \expandafter\pld@CF@loop
+    \fi}
+\def\pld@CMAddToTempoly{%
+    \pld@AccuGet\pld@temp\edef\pld@temp{\noexpand\pld@R\pld@temp}%
+    \pld@CondenseMonomials\pld@false\pld@symbols
+    \ifx\pld@symbols\@empty \else
+        \pld@ExtendPoly\pld@temp\pld@symbols
+    \fi
+    \ifx\pld@temp\@empty \else
+        \pld@if
+            \expandafter\pld@IfSum\expandafter{\pld@temp}%
+                {\expandafter\def\expandafter\pld@temp\expandafter
+                    {\expandafter\pld@F\expandafter{\pld@temp}{}}}%
+                {}%
+        \fi
+        \pld@ExtendPoly\pld@tempoly\pld@temp
+        \pld@Extend\pld@tempoly{\pld@monom}%
+    \fi}
+\makeatother
+
+%%%%%%%%%%%%%
+% Counters  %
+%%%%%%%%%%%%%
+
+\setcounter{section}{1}
+
+%%%%%%%%%%
+% Title  %
+%%%%%%%%%%
+\title{
+אלגברה 1מ' \\ תרגול 1 -- פולינומים
+}
+\author{אלעד צורני}
+\date{
+25 באוקטובר 2020
+}
+
+\begin{document}
+\maketitle
+
+\subsection*{הגדרות בסיסיות}
+
+\begin{definition}[פולינום]
+\emph{פולינום במשתנה x מעל שדה $\mathbb{F}$}
+הוא ביטוי מהצורה
+\[
+f\prs{x} = a_n x^n + a_{n-1} x^{n-1} \ldots + a_1 x + a_0
+\]
+כאשר
+$a_0, \ldots, a_n \in \mathbb{F}$.\\
+לפעמים נכתוב זאת בקצרה
+\[\text{.} f\prs{x} = \sum_{i = 0}^n a_i x^i\]
+\end{definition}
+
+\begin{examples*}[פולינומים]
+\enumthm
+\begin{enumerate}
+\item $0$
+\item $42$
+\item $x-16$
+\item $x^2 - 7x - 2$
+\item $3 x^2$ 
+\end{enumerate}
+\end{examples*}
+
+\begin{definition}[הדרגה של פולינום]
+עבור מספר אי־שלילי
+$m$
+נאמר ש%
+\emph{הדרגה של פולינום
+$f(x)$
+היא
+$m$}
+ונסמן
+\[\deg \prs{f} \coloneqq n\]
+אם יש איברים
+$a_0, \ldots, a_n \in \mathbb{F}$
+עבורם
+$a_n \neq 0$
+וגם
+\[\text{.} f(x) = a_n x^n + a_{m-1} x^{m-1} + \ldots + a_1 x + a_0\]
+עבור
+$f(x) = 0$
+נגדיר את הדרגה של
+$f$
+להיות
+$\deg\prs{f} \coloneqq -\infty$.
+\end{definition}
+
+\begin{definition}[מקדם מוביל]
+עבור פולינום
+$f(x)$
+מדרגה
+$n$
+המקדם
+$a_n$
+נקרא
+\emph{המקדם המוביל של
+$f$}.
+\end{definition}
+
+\begin{definition}[פולינום מוֹני]
+אם המקדם המוביל של פולינום
+$f(x)$
+שווה
+$1$,
+נאמר ש־%
+\emph{$f$
+פולינום מוֹני%
+}.
+\end{definition}
+
+\begin{definition}[מקדם מוביל]
+עבור פולינום
+$f(x)$,
+המקדם
+$a_0$
+נקרא
+\emph{המקדם המוביל של
+$f$}
+(גם אם
+$a_0 = 0$%
+).
+\end{definition}
+
+\begin{notation}[מרחב פולינומים]
+אוסף הפולינומים במשתנה
+$x$
+מעל שדה
+$\mathbb{F}$
+מסומן
+$\mathbb{F}\brs{x}$.
+\end{notation}
+
+\begin{notation}[פולינומים עד דרגה
+$n$]
+מרחב הפולינומים במשתנה
+$x$
+מעל שדה
+$\mathbb{F}$
+שדרגתם לכל היותר
+$n$
+מסומן
+$\mathbb{F}_n\brs{x}$.
+\end{notation}
+
+\subsection*{חיבור, כפל וחילוק פולינומים}
+
+כדי לחבר פולינומים, נחבר את המקדמים שלהם.
+
+\begin{definition}[חיבור פולינומים]
+בהינתן שני פולינומים
+\[f\prs{x} = \sum_{i = 0}^n a_i x^i, \quad g\prs{x} = \sum_{j=0}^m b_i x^i\]
+נגדיר את
+\emph{הסכום שלהם}
+על ידי
+\[\prs{f+g}\prs{x} \coloneqq \sum_{i=0}^{\max\set{n,m}} \prs{a_i + b_i} x^i\]
+עם הסימון
+$a_i = 0$
+עבור
+$i > n$
+והסימון
+$b_j = 0$
+עבור
+$j > m$.
+\end{definition}
+
+\begin{remark}
+מתקיים
+\[\text{.}\deg\prs{f+g} \leq \deg\prs{f} + \deg\prs{g}\]
+\end{remark}
+
+\begin{example}
+\[\prs{x^3 + 17x - 42} + \prs{-x^3 + x^2 - 17x + 3} = \prs{1-1}x^3 + 1 \cdot x^2 + \prs{17-17}x + \prs{-42 + 3} = x^2 - 39\]
+\end{example}
+
+כדי לכפול פולינומים, נחבר את מכפלות הגורמים שלהם.
+
+\begin{definition}[כפל פולינומים]
+עבור פולינומים
+\[f\prs{x} = \sum_{i = 0}^n a_i x^i, \quad g\prs{x} = \sum_{j = 0}^m b_i x^i\]
+נגדיר את
+\emph{המכפלה שלהם}
+על ידי
+\[\text{.} \prs{f \cdot g}\prs{x} \coloneqq \sum_{d = 0}^{n+m} \prs{\sum_{i = 0}^d a_i b_{d-i}} x^d\]
+בדרך כלל נסמן
+$fg$
+במקום
+$f \cdot g$.
+\end{definition}
+
+\begin{remark}
+מתקיים
+\[\text{.} \deg\prs{f \cdot g} \leq \deg\prs{f} + \deg\prs{g}\]
+\end{remark}
+
+\begin{example}
+\begin{align*}
+\prs{x^3 + 6x - 5} \prs{2 x^2 + 3 x - 7} &=
+\prs{\prs{-5} \cdot \prs{-7}} + \prs{-5 \cdot 3 + 6 \cdot \prs{-7}} x + \prs{-5 \cdot 2 + 6 \cdot 3} x^2 \\&\phantom{=} + \prs{6 \cdot 2 + 1 \cdot \prs{-7}} x^3 + \prs{1 \cdot 3} x^4 + \prs{1 \cdot 2} x^5
+\\&=
+35 + \prs{-15-42} x + \prs{-10 + 18} x^2 + \prs{12 - 7} x^3 + 3 x^4 + 2 x^5
+\\&=
+2x^5 + 3x^4 + 5 x^3 + 8 x^2 - 57 x + 35 
+\end{align*}
+\end{example}
+
+\begin{definition}[חילוק פולינומים]
+עבור פולינומים
+$f,g,r \in \mathbb{F}\brs{x}$
+נגיד כי
+\emph{
+$f$
+מתחלק ב־%
+$g$
+עם שארית
+$r$
+}
+אם קיים פולינום
+$h \in \mathbb{F}\brs{x}$
+עבורו
+$f = hg + r$
+וגם
+$\deg\prs{r} \leq \deg\prs{g}$.
+\\
+אם קיים פולינום
+$h \in \mathbb{F}\brs{x}$
+עבורו
+$f = hg$
+נאמר כי
+\emph{
+$f$
+מתחלק ב־%
+$g$
+},
+נגיד ש־%
+$h$
+שווה לחלוקה של
+$f$
+ב־%
+$g$
+ונסמן
+\[\text{.} h = \frac{f}{g}\]
+במקרה זה גם נאמר ש־%
+$g$
+מחלק את
+$f$
+ונסמן
+$g \mid f$.
+\end{definition}
+
+\begin{algorithm}[חילוק ארוך של פולינומים]
+נתאר אלגוריתם לחילוק פולינום
+$f$
+בפולינום
+$g$
+עם שארית.
+
+נציג תוך כדי זאת דוגמה בה
+\[\text{.} f(x) = x^3 - 2x^2 - 4, \quad g\prs{x} = x-3\]
+
+\begin{enumerate}
+\item נכתוב את הפולינום
+$f$
+כולל גורמים עם מקדם
+$0$.
+משמאלו נכתוב את הפולינום
+$g$.
+
+\begin{otherlanguage}{english}
+\[
+\begin{array}{l}
+{}\\
+x-3\overline{) x^3 - 2x^2 + 0x - 4}
+\end{array}
+\]
+\end{otherlanguage}
+
+\item
+
+נחלק את הגורם המוביל של
+$f$
+בזה של
+$g$
+ונכתוב את התוצאה למעלה.
+
+\begin{otherlanguage}{english}
+\[
+\begin{array}{l}
+{\hphantom{x-3)x^3 - 2}}x^2\\
+x-3\overline{) x^3 - 2x^2 + 0x - 4}
+\end{array}
+\]
+\end{otherlanguage}
+
+
+\item נכפול את הגורם שהוספנו למעלה ב־%
+$g$
+ונכתוב את מינוס התוצאה מתחת ל־%
+$f$.
+
+\begin{otherlanguage}{english}
+\[
+\begin{array}{l}
+{\hphantom{x-3) x^3 - 2}}x^2\\
+x-3\overline{) x^3 - 2x^2 + 0x - 4} \\
+\hphantom{x-3} \hspace{-8pt} -x^3 + 3x^2
+\end{array}
+\]
+\end{otherlanguage}
+
+\item
+נסכום את השורה שכתבנו עם
+$f$
+ונכתוב את התוצאה מתחתיה.
+``נוריד"
+גורם נוסף מ־%
+$f$
+למטה ונוסיף אותו לתוצאה.
+
+\begin{otherlanguage}{english}
+\[
+\begin{array}{l}
+{\hphantom{x-3) x^3 - 2}}x^2\\
+x-3\overline{) x^3 - 2x^2 + 0x - 4} \\
+\hphantom{x-3} \hspace{-8pt} -x^3 + 3x^2 \\
+\hphantom{x-3)} \overline{\hphantom{x^3 -3 } x^2 + 0x \hphantom{-4..}}
+\end{array}
+\]
+\end{otherlanguage}
+
+\item
+נחזור על שלבים 2 עד 4, רק שהפעם נחלק את ההפרש שקיבלנו ב־%
+$g$.
+
+\begin{otherlanguage}{english}
+\[
+\begin{array}{l}
+{\hphantom{x-3) x^3 - 2}}x^2 + \hphantom{0} x\\
+x-3\overline{) x^3 - 2x^2 + 0x - 4} \\
+\hphantom{x-3} \hspace{-8pt} -x^3 + 3x^2 \\
+\hphantom{x-3)} \overline{\hphantom{x^3 -3 } x^2 + 0x \hphantom{-4..}}
+\\
+\hphantom{x-3)} \hphantom{x^3 -3 } \hspace{-12pt} -x^2 + 3x
+\\
+\hphantom{x-3 ) x^3 + 2}\overline{\hphantom{x^2 +. \hspace{-3pt}} 3x - 4 \hphantom{.}}
+\end{array}
+\]
+\end{otherlanguage}
+
+\item
+נחזור על שלב 5 עד לקבל הפרש מדרגה שקטנה מזאת של
+$g$.
+ההפרש יהיה השארית
+$r(x)$
+והפולינום מעל
+$f$
+יהיה המנה
+$h\prs{x}$
+של
+$f\prs{x}$
+ב־%
+$g\prs{x}$
+עם שארית
+$r\prs{x}$.
+
+\begin{otherlanguage}{english}
+\[
+\begin{array}{l}
+{\hphantom{x-3) x^3 - 2}}x^2 + \hphantom{0} x\\
+x-3\overline{) x^3 - 2x^2 + 0x - 4} \\
+\hphantom{x-3} \hspace{-8pt} -x^3 + 3x^2 \\
+\hphantom{x-3)} \overline{\hphantom{x^3 -3 } x^2 + 0x \hphantom{-4..}}
+\\
+\hphantom{x-3)} \hphantom{x^3 -3 } \hspace{-12pt} -x^2 + 3x
+\\
+\hphantom{x-3 ) x^3 + 2}\overline{\hphantom{x^2 +. \hspace{-3pt}} 3x - 4 \hphantom{.}}
+\\
+\hphantom{x-3 ) x^3 + 2}{\hphantom{x^2 +. \hspace{-3pt}} \hspace{-12pt} -3x + 9 \hphantom{.}}
+\\
+\hphantom{x-3 ) x^3 - 2x^2 + .} \overline{\hphantom{3x -} 5 \hphantom{.}}
+\end{array}
+\]
+\end{otherlanguage}
+
+
+\end{enumerate}
+\end{algorithm}
+
+\subsection*{שורשים של פולינומים}
+
+\begin{definition}[שורש של פולינום]
+יהי
+$f \in \mathbb{F}\brs{x}$.
+איבר
+$\alpha \in \mathbb{F}$
+נקרא
+\emph{
+שורש של
+$f$
+}
+אם
+$f\prs{\alpha} = 0$.
+\end{definition}
+
+\begin{example}
+השורשים של הפולינום
+$f\prs{x} = x^2 - 1$
+הם
+$\set{-1,1}$.
+\end{example}
+
+\begin{theorem}[המשפט היסודי של האלגברה]
+לכל
+פולינום מרוכב
+$f \in \mathbb{C}\brs{x}$
+ממעלה לפחות
+$1$
+קיים שורש.
+\end{theorem}
+
+\begin{corollary}
+יהי
+$f \in \mathbb{C}\brs{x}$
+מדרגה
+$n$.
+קיימים ל־%
+$f$
+בדיוק
+$n$
+שורשים
+$\prs{\alpha_1, \ldots, \alpha_n}$
+ב־%
+$\mathbb{C}$
+ומתקיים
+\[f = a_n \prod_{i = 1}^n \prs{x - \alpha_n} \coloneqq a_n \prs{x - \alpha_1} \cdot \ldots \cdot \prs{x - \alpha_n}\]
+כאשר
+$a_n$
+המקדם המוביל של
+$f$.
+\end{corollary}
+
+\begin{corollary}
+יהי
+$f \in \mathbb{C}\brs{x}$.
+אם
+$\alpha \in \mathbb{C}$
+שורש של
+$f$,
+מתקיים
+\[\text{.}\prs{x - \alpha} \mid f\prs{x}\]
+\end{corollary}
+
+\begin{definition}[הריבוי של שורש]
+יהי
+$f \in \mathbb{C}\brs{x}$
+ויהי
+$\alpha \in \mathbb{C}$
+שורש של
+$f$.
+המספר
+$n$
+המקסימלי עבורו
+$\prs{x-\alpha}^n \mid f$
+נקרא
+\emph{
+הריבוי של
+$\alpha$
+כשורש של
+$f$
+}
+ומסומן
+$m\prs{\alpha}$.
+\end{definition}
+
+\begin{definition}[שורש פשוט]
+יהי
+$f \in \mbb{F}\brs{x}$.
+שורש
+$\alpha$
+של
+$f$
+יקרא
+\emph{פשוט}
+אם
+$m\prs{\alpha} = 1$.
+\end{definition}
+
+\begin{proposition}
+יהי
+$f \in \mbb{F}\brs{x}$
+ויהי
+$\alpha \in \mbb{F}$.
+מתקיים
+$m\prs{\alpha} = \ell$
+אם ורק אם
+\[\text{.} f\prs{\alpha} = f'\prs{\alpha} = \ldots = f^{\prs{k-1}}\prs{\alpha} = 0, \quad f^{\prs{\ell}}\prs{\alpha} \neq 0\]
+\end{proposition}
+
+\begin{corollary}
+שורש
+$\alpha$
+של פולינום
+$f$
+הוא פשוט אם ורק אם
+$f\prs{\alpha} = 0$
+וגם
+$f'\prs{\alpha} \neq 0$.
+\end{corollary}
+
+\begin{theorem}[משפט השורש הרציונלי]
+עבור
+\[f\prs{x} = \sum_{i=0}^n a_i x^i \in \mbb{Z}\brs{x}\]
+פולינום עם מקדמים שלמים,
+כל שורש רציונלי של
+$f$
+הוא מהצורה
+$\frac{p}{q}$
+עבור
+$p,q \in \mbb{Z}$
+שלמים המקיימים
+$p \mid a_0$
+וגם
+$q \mid a_n$.
+\end{theorem}
+
+\begin{exercise}
+השתמשו במשפט השורש הרציונלי כדי למצוא את השורשים מעל
+$\mbb{C}$
+של הפולינום
+$f\prs{x} = 2x^3 - x^2 - 4x + 2$
+ואת הריבויים שלהם.
+\end{exercise}
+
+\begin{solution}
+מתקיים
+$f \in \mbb{Z}\brs{x}$
+ולכן אפשר להשתמש במשפט השורש הרציונלי. אצלנו
+$a_n = a_0 = 2$
+לכן שורש רציונלי יהיה מהצורה
+$\frac{p}{q}$
+עבור
+$p,q \in \set{\pm 1, \pm 2}$.
+לכן שורש רציונלי יהיה בקבוצה
+$\set{\pm \frac{1}{2}, \pm 1, \pm 2}$.
+בדיקה של השורשים האפשריים תיתן שהשורש הרציונלי היחיד של
+$f$
+הוא
+$\frac{1}{2}$.
+לכן,
+$x - \frac{1}{2} \mid f$
+ונוכל למצוא את שאר שורשי
+$f$
+על ידי הסתכלות על שורשי
+$g\prs{x} \ceq \frac{f}{x-\frac{1}{2}}$.
+
+נמצא את
+$\frac{f}{x-\frac{1}{2}}$
+באמצעות חילוק ארוך:
+
+\begin{otherlanguage}{english}
+\[
+\polylongdiv{2x^3 - x^2 - 4x + 2}{x-\frac{1}{2}}
+\]
+\end{otherlanguage}
+
+קיבלנו
+\[g\prs{x} = 2x^2 - 4 = \prs{\sqrt{2}x + 2}\prs{\sqrt{2}x - 2} = 2 \prs{x + \sqrt{2}}\prs{x-\sqrt{2}}\]
+לכן
+\[f\prs{x} = 2 \prs{x-\frac{1}{2}}\prs{x-\sqrt{2}}\prs{x+\sqrt{2}}\]
+ושורשי
+$f$
+הם
+$\set{\frac{1}{2}, \sqrt{2}, -\sqrt{2}}$,
+כולם מריבוי
+$1$.
+\end{solution}
+
+\begin{exercise}
+יהי
+\[\text{.} f\prs{x} = x^4 - 2x^3 - x^2 + 4x - 2\]
+מצאו את השורשים של
+$f$
+ואת הריבויים שלהם.
+\end{exercise}
+
+\begin{solution}
+ממשפט השורש הרציונלי, השורשים הרציונליים האפשריים של
+$f$
+הם
+$\set{\pm 1, \pm 2}$.
+מהצבה נקבל שהשורש הרציונלי היחיד של
+$f$
+הוא
+$1$.
+אם נחלק את
+$f$
+ב־%
+$\prs{x-1}$
+נקבל פולינום ממעלה
+$3$
+ולא נוכל להשתמש בנוסחת השורשים. לכן נבדוק קודם מה הריבוי של
+$1$.
+מתקיים
+\begin{align*}
+f'\prs{x} &= 4x^3 -6x^2 -2x + 4 \\
+f''\prs{x} &= 12x^2 - 12x - 2
+\end{align*}
+לכן
+\begin{align*}
+f'\prs{1} &= 4-6-2 + 4 = 0 \\
+f''\prs{1} = 12 - 12 - 2 = -2 \neq 0
+\end{align*}
+ולכן
+$m\prs{1} = 2$.
+לכן
+$\prs{x-1}^2 \mid f\prs{x}$.
+נחשב את המנה
+\[g\prs{x} \ceq \frac{f\prs{x}}{\prs{x-1}^2} = \frac{f\prs{x}}{x^2 - 2x + 1}\]
+ונקבל
+\begin{otherlanguage}{english}
+\[
+\polylongdiv{x^4 - 2x^3 - x^2 + 4x - 2}{x^2 - 2x + 1}
+\]
+\end{otherlanguage}
+
+כלומר
+\[f\prs{x} = \prs{x-1}^2 \prs{x^2 - 2} = \prs{x-1}^2 \prs{x+\sqrt{2}}\prs{x-\sqrt{2}}\]
+לכן שורשי
+$f$
+הם
+$1$
+מריבוי
+$2$
+ו־%
+$\set{\pm \sqrt{2}}$
+כל אחד מריבוי
+$1$.
+\end{solution}
+
+\subsection*{נוסחאות וייטה}
+
+לפעמים נרצה תיאור נוח לסכומים או מכפלות של שורשי פולינום.
+אם נתון פולינום
+\[f\prs{x} = \sum_{i = 0}^n a_i x^i\]
+מדרגה
+$n$
+ועם שורשים
+$\prs{r_i}_{i = 1}^n$,
+נכתוב
+\[f\prs{x} = a_n \prod_{i = 1}^n \prs{x-r_i}\]
+ונקבל כי המקדם החופשי הוא
+\[a_0 = a_n \prs{-1}^n \prod_{i=1}^n r_i\]
+לכן
+\[\text{.} \prod_{i=1}^n r_i = \prs{-1}^n \frac{a_0}{a_n} \]
+נקבל גם
+\[a_{n-1} = a_n\prs{-r_1 - \ldots - r_n}\]
+ולכן
+\[\text{.} \sum_{i=1}^n r_i = -\frac{a_{n-1}}{a_n}\]
+
+נוסחאות וייטה מתארות קשר כללי יותר בין מקדמי פולינום לשורשיו.
+
+\begin{theorem}[נוסחאות וייטה]
+יהי
+\[f\prs{x} = \sum_{i = 0}^n a_i x^i\]
+פולינום מדרגה
+$n$
+מעל
+$\mbb{R}$
+או
+$\mbb{C}$.
+
+יהיו
+$\prs{r_i}_{i = 1}^n$
+שורשי
+$f$.
+לכל
+$k \in \set{1, \ldots, n}$
+מתקיים
+\[\text{.} \sum_{1 \leq i_1 < \ldots < i_k \leq n} \prs{\prod_{j=1}^k r_{i_j}} = \prs{-1}^k \frac{a_{n-k}}{a_n}\]
+\end{theorem}
+
+\begin{exercise}
+מצאו את שורשי הפולינום
+\[\text{.} f\prs{x} = x^3 - \prs{2 + \sqrt{2}}x^2 + \prs{2 \sqrt{2} + 1}x - \sqrt{2}\]
+\end{exercise}
+
+\begin{solution}
+נשים לב שסכום מקדמי הפולינום שווה
+$0$,
+לכן
+$1$
+שורש של
+$f$.
+מתקיים
+\begin{align*}
+f'\prs{x} = 3x^2 - \prs{4 + 2\sqrt{2}} x + 2 \sqrt{2} + 1 \\
+f''\prs{x} = 6x - 4 - 2 \sqrt{2}
+\end{align*}
+לכן
+\begin{align*}
+f'\prs{1} &= 3 - 4 - 2\sqrt{2} + 2 \sqrt{2} + 1 = \sqrt{2} = 0 \\
+f''\prs{1} &= 6-4-2 = 0
+\end{align*}
+ולכן
+$m\prs{1} = 2$.
+מנוסחאת וייטה נקבל שסכום שורשי
+$f$
+שווה
+$2+\sqrt{2}$
+לכן השורש הנוסף הוא
+$\sqrt{2}$
+מריבוי
+$1$.
+\end{solution}
+
+\begin{exercise}
+יהי
+\[f\prs{x} = -4 x^3 + a_2 x^2 + a_0\]
+פולינום מעל
+$\mbb{C}$
+שתלוי בנעלמים
+$a_0, a_2$.
+נתון כי סכום שורשי
+$f$
+שווה
+$4$
+וכי מכפלתם שווה
+$-3$.
+מצאו את שורשי
+$f$
+ואת הריבויים שלהם.
+\end{exercise}
+
+\begin{solution}
+נסמן את שורשי הפולינום
+$\set{r_1, r_2, r_3}$.
+מנוסחאת וייטה עבור
+$k = 1$
+נקבל
+\[4 = r_1 + r_2 + r_3 = - \frac{a_2}{a_3}\]
+לכן
+\[a_2 = -4 a_3 = \prs{-4}^2 = 16 \text{.}\]
+
+מנוסחת וייטה עבור
+$k=3$
+נקבל
+\[-3 = r_1 r_2 r_3 = \prs{-1}^3 \frac{a_0}{a_n}\]
+כלומר
+\[\text{.} a_0 = 3 a_n = -12\]
+
+לכן
+\[\text{.} f\prs{x} = -4x^3 + 16x^2 - 12\]
+ל־%
+$f$
+אותם שורשים כמו ל־%
+$-\frac{f}{4}$
+כיוון שכפל בקבוע שונה מאפס אינו משפיע על שורשי פולינום.
+לכן נחפש שורשים עבור
+\[\text{.} g\prs{x} \coloneqq -\frac{f\prs{x}}{4} = x^3 - 4x^2 + 3\]
+מקדמי
+$g$
+שלמים ולכן נוכל להיעזר במשפט השורש הרציונלי. נקבל שהשורשים הרציונליים של
+$g$
+הם מהצורה
+$\frac{p}{q}$
+עבור
+$p,q \in \mbb{Z}$
+המקיימים
+$p \mid 1$
+ו־%
+$q \mid 3$.
+לכן, השורשים הרציונליים של
+$g$
+בקבוצה
+$\set{\pm 1, \pm \frac{1}{3}}$.
+נשים לב כי
+$1$
+אכן שורש של
+$g$.
+נבצע חילוק פולינומים
+
+\begin{otherlanguage}{english}
+\[
+\polylongdiv{x^3 - 4x^2 + 3}{x-1}
+\]
+\end{otherlanguage}
+
+ונקבל כי
+\[\text{.} g\prs{x} = \prs{x-1}\prs{x^2 - 3x - 3}\]
+את שורשי
+$x^2 - 3x - 3$
+נמצא בעזרת נוסחת השורשים ונקבל
+\[\text{.} g\prs{x} = \prs{x-1} \prs{x-\frac{3}{2} - \frac{\sqrt{21}}{2}} \prs{x - \frac{3}{2} + \frac{\sqrt{21}}{2}}\]
+לכן שורשי
+$f$
+הם
+$\set{1, \frac{3}{2} \pm \frac{\sqrt{21}}{2}}$,
+כל אחד מהם מריבוי
+$1$.
+\end{solution}
+
+\end{document}
